@@ -16,6 +16,10 @@ def login():
 def register():
     return render_template('register.html')
 
+@routes.route('/index')
+def index():
+    return render_template('index.html')
+
 @routes.route('/create_user', methods=['POST'])
 def create_user():
     username = request.form['username']
@@ -42,7 +46,7 @@ def login_user():
     user = User.query.filter_by(username=username).first()
 
     if user and user.password == password:
-        return jsonify({"message": "Logged in successfully"}), 200
+        return redirect(url_for('routes.index'))
     else:
         return jsonify({"message": "Invalid username or password"}), 401
 

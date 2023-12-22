@@ -18,6 +18,7 @@
         <!-- Pomodoro Controls -->
         <button id="pomodoroButton" onclick="togglePomodoro()">Start Pomodoro</button>
         <button id="modeButton" onclick="changeMode()">Short Break</button>
+        <button onclick="resetTimer()">Reset Timer</button>
         <button onclick="openSettings()">Settings</button>
 
         <!-- Settings Form (Hidden initially) -->
@@ -27,6 +28,7 @@
             <label>Long Break (minutes): <input type="number" id="longBreakInput" value="15"></label><br>
             <button onclick="applySettings()">Apply Settings</button>
         </div>
+    </div>
     </div>
     <script>
         var workTime = 25 * 60; // 25 minutes
@@ -57,6 +59,14 @@
                 updateTimerDisplay();
             }, 1000);
             isTimerRunning = true;
+        }
+
+        function resetTimer() {
+            currentTimer = workTime; // Reset the timer to the work interval
+            updateTimerDisplay();
+            clearInterval(interval); // Clear any running intervals
+            isTimerRunning = false;
+            document.getElementById('pomodoroButton').textContent = 'Start Pomodoro';
         }
 
         function togglePomodoro() {
