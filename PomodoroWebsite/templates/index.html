@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+    <title>Pomodoro Tracker</title>
+    <style>
+        #timer {
+            font-size: 24px;
+            margin: 20px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Pomodoro Tracker</h1>
+    <a href="/login"><button>Login</button></a>
+    <a href="/register"><button>Register</button></a>
+
+    <div id="timer">25:00</div>
+    <button id="pomodoroButton" onclick="togglePomodoro()">Start Pomodoro</button>
+    <button id="modeButton" onclick="changeMode()">Short Break</button>
+
+    <script>
+        var workTime = 25 * 60; // 25 minutes
+        var shortBreak = 5 * 60; // 5 minutes
+        var longBreak = 60 * 60; // 1 hour
+        var currentTimer = workTime;
+        var isTimerRunning = false;
+        var interval;
+        var mode = 'work'; // Possible values: 'work', 'shortBreak', 'longBreak'
+
+        function updateTimerDisplay() {
+            var minutes = parseInt(currentTimer / 60, 10);
+            var seconds = parseInt(currentTimer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            document.querySelector('#timer').textContent = minutes + ":" + seconds;
+        }
+
+        function startTimer() {
+            interval = setInterval(function () {
+                if (--currentTimer < 0) {
+                    clearInterval(interval);
+                    isTimerRunning = false;
+                    document.getElementById('pomodoroButton').textContent = 'Start Pomodoro';
+                }
+                updateTimerDisplay();
+            }, 1000);
+            isTimerRunning = true;
+        }
+
+        function togglePomodoro() {
+            if (isTimerRunning) {
+                clearInterval(interval);
+                isTimerRunning = false;
+                document.getElementById('pomodoroButton').textContent = 'Resume Pomodoro';
+            } else {
+                startTimer();
+                document.getElementById('pomodoroButton').textContent = 'Pause Pomodoro';
+            }
+        }
+
+        function changeMode() {
+            switch (mode) {
+                case 'work':
+                    currentTimer = shortBreak;
+                    mode = 'shortBreak';
+                    document.getElementById('modeButton').textContent = 'Long Break';
+                    break;
+                case 'shortBreak':
+                    currentTimer = longBreak;
+                    mode = 'longBreak';
+                    document.getElementById('modeButton').textContent = 'Work Time';
+                    break;
+                case 'longBreak':
+                    currentTimer = workTime;
+                    mode = 'work';
+                    document.getElementById('modeButton').textContent = 'Short Break';
+                    break;
+            }
+            updateTimerDisplay();
+            if (isTimerRunning) {
+                clearInterval(interval);
+                startTimer();
+            }
+        }
+
+        updateTimerDisplay();
+    </script>
+</body>
+</html>

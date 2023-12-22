@@ -1,4 +1,4 @@
--- Create Users Table
+-- Create the 'users' table
 CREATE TABLE "users" (
     "userid" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
     "username" TEXT UNIQUE NOT NULL, 
@@ -6,7 +6,7 @@ CREATE TABLE "users" (
     "email" TEXT UNIQUE NOT NULL
 );
 
--- Create PomodoroSettings Table
+-- Create the 'PomodoroSettings' table
 CREATE TABLE "PomodoroSettings" (
     "SettingID" INTEGER PRIMARY KEY AUTOINCREMENT,
     "UserID" INTEGER,
@@ -16,7 +16,7 @@ CREATE TABLE "PomodoroSettings" (
     FOREIGN KEY ("UserID") REFERENCES "users"("userid")
 );
 
--- Create PomodoroLogs Table
+-- Create the 'PomodoroLogs' table
 CREATE TABLE "PomodoroLogs" (
     "LogID" INTEGER PRIMARY KEY AUTOINCREMENT,
     "UserID" INTEGER,
@@ -24,13 +24,13 @@ CREATE TABLE "PomodoroLogs" (
     FOREIGN KEY ("UserID") REFERENCES "users"("userid")
 );
 
--- Create UserSettingsView View
+-- Create the 'UserSettingsView' view
 CREATE VIEW "UserSettingsView" AS
 SELECT u."username", p."WorkInterval", p."ShortBreakInterval", p."LongBreakInterval"
 FROM "users" u
 JOIN "PomodoroSettings" p ON u."userid" = p."UserID";
 
--- Create AfterUserCreation Trigger
+-- Create the 'AfterUserCreation' trigger
 CREATE TRIGGER "AfterUserCreation"
 AFTER INSERT ON "users"
 BEGIN
