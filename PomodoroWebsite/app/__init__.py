@@ -11,7 +11,7 @@ def create_app():
     db.init_app(app)
     
     with app.app_context():
-        db.create_all()  # Optional: You can remove this if you manage database migrations differently
+        db.create_all() 
 
     app.register_blueprint(routes)
 
