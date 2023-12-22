@@ -47,3 +47,12 @@ button {
 button:hover {
     background-color: darkblue;
 }
+
+.pomodoro-settings {
+    text-align: left;
+    margin-top: 20px;
+}
+
+.pomodoro-settings h2 {
+    margin-bottom: 10px;
+}

@@ -12,9 +12,21 @@
         <a href="/login"><button>Login</button></a>
         <a href="/register"><button>Register</button></a>
 
+        <!-- Pomodoro Timer Display -->
         <div id="timer">25:00</div>
+
+        <!-- Pomodoro Controls -->
         <button id="pomodoroButton" onclick="togglePomodoro()">Start Pomodoro</button>
         <button id="modeButton" onclick="changeMode()">Short Break</button>
+        <button onclick="openSettings()">Settings</button>
+
+        <!-- Settings Form (Hidden initially) -->
+        <div id="settingsForm" style="display:none;">
+            <label>Work Interval (minutes): <input type="number" id="workInput" value="25"></label><br>
+            <label>Short Break (minutes): <input type="number" id="shortBreakInput" value="5"></label><br>
+            <label>Long Break (minutes): <input type="number" id="longBreakInput" value="15"></label><br>
+            <button onclick="applySettings()">Apply Settings</button>
+        </div>
     </div>
     <script>
         var workTime = 25 * 60; // 25 minutes
@@ -23,7 +35,7 @@
         var currentTimer = workTime;
         var isTimerRunning = false;
         var interval;
-        var mode = 'work'; // Possible values: 'work', 'shortBreak', 'longBreak'
+        var mode = 'work'; 
 
         function updateTimerDisplay() {
             var minutes = parseInt(currentTimer / 60, 10);
@@ -84,6 +96,29 @@
         }
 
         updateTimerDisplay();
+
+        function openSettings() {
+            document.getElementById('settingsForm').style.display = 'block';
+        }
+
+        function applySettings() {
+            workTime = parseInt(document.getElementById('workInput').value) * 60;
+            shortBreak = parseInt(document.getElementById('shortBreakInput').value) * 60;
+            longBreak = parseInt(document.getElementById('longBreakInput').value) * 60;
+
+            // Reset timer and update display
+            if (mode === 'work') {
+                currentTimer = workTime;
+            } else if (mode === 'shortBreak') {
+                currentTimer = shortBreak;
+            } else {
+                currentTimer = longBreak;
+            }
+            updateTimerDisplay();
+
+            // Hide settings form
+            document.getElementById('settingsForm').style.display = 'none';
+        }
     </script>
 </body>
 </html>
