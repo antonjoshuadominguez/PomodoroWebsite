@@ -24,12 +24,6 @@ CREATE TABLE "PomodoroLogs" (
     FOREIGN KEY ("UserID") REFERENCES "users"("userid")
 );
 
--- Create the 'UserSettingsView' view
-CREATE VIEW "UserSettingsView" AS
-SELECT u."username", p."WorkInterval", p."ShortBreakInterval", p."LongBreakInterval"
-FROM "users" u
-JOIN "PomodoroSettings" p ON u."userid" = p."UserID";
-
 -- Create the 'AfterUserCreation' trigger
 CREATE TRIGGER "AfterUserCreation"
 AFTER INSERT ON "users"

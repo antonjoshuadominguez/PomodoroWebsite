@@ -1,7 +1,6 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
-from werkzeug.security import generate_password_hash, check_password_hash
-from .models import db, User, UserSettingsView
+from .models import db, User, PomodoroSettings
 
 routes = Blueprint('routes', __name__)
 
@@ -19,39 +18,47 @@ def register():
 
 @routes.route('/create_user', methods=['POST'])
 def create_user():
-    data = request.json
-    if 'username' not in data or 'password' not in data or 'email' not in data:
-        return jsonify({"message": "Missing data fields"}), 400
+    username = request.form['username']
+    password = request.form['password']  # Directly using the password without hashing
+    email = request.form['email']
+
+    new_user = User(username=username, password=password, email=email)
 
     try:
-        hashed_password = generate_password_hash(data['password'])
-        new_user = User(username=data['username'], password=hashed_password, email=data['email'])
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({"message": "User created successfully"}), 201
-    except IntegrityError:
+        flash('User registered successfully.')
+        return redirect(url_for('routes.login'))
+    except Exception as e:
         db.session.rollback()
-        return jsonify({"message": "Username or email already exists"}), 409
+        flash('Registration failed: ' + str(e))
+        return redirect(url_for('routes.register'))
+
 
 @routes.route('/login_user', methods=['POST'])
 def login_user():
-    data = request.json
-    user = User.query.filter_by(username=data['username']).first()
+    username = request.form['username']
+    password = request.form['password']
+    user = User.query.filter_by(username=username).first()
 
-    if user and check_password_hash(user.password, data['password']):
+    if user and user.password == password:
         return jsonify({"message": "Logged in successfully"}), 200
     else:
         return jsonify({"message": "Invalid username or password"}), 401
 
 @routes.route('/get_user_settings/<username>', methods=['GET'])
 def get_user_settings(username):
-    settings = db.session.query(UserSettingsView).filter_by(username=username).first()
-    if settings:
-        return jsonify({
-            "username": settings.username,
-            "WorkInterval": settings.WorkInterval,
-            "ShortBreakInterval": settings.ShortBreakInterval,
-            "LongBreakInterval": settings.LongBreakInterval
-        })
+    user = User.query.filter_by(username=username).first()
+    if user:
+        settings = PomodoroSettings.query.filter_by(UserID=user.userid).first()
+        if settings:
+            return jsonify({
+                "username": username,
+                "WorkInterval": settings.WorkInterval,
+                "ShortBreakInterval": settings.ShortBreakInterval,
+                "LongBreakInterval": settings.LongBreakInterval
+            })
+        else:
+            return jsonify({"message": "Settings not found"}), 404
     else:
         return jsonify({"message": "User not found"}), 404

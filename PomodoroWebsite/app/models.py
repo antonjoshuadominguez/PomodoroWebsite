@@ -22,11 +22,3 @@ class PomodoroLogs(db.Model):
     LogID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     UserID = db.Column(db.Integer, db.ForeignKey('users.userid'))
     Note = db.Column(db.Text)
-
-class UserSettingsView(db.Model):
-    __tablename__ = 'UserSettingsView'
-    username = db.Column(db.Text, primary_key=True)
-    WorkInterval = db.Column(db.Integer)
-    ShortBreakInterval = db.Column(db.Integer)
-    LongBreakInterval = db.Column(db.Integer)
-
