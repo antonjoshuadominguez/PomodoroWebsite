@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
-from .models import db, User, PomodoroSettings
+from .models import db, User, PomodoroSettings, UserSettingsView
 
 routes = Blueprint('routes', __name__)
 
@@ -48,17 +48,14 @@ def login_user():
 
 @routes.route('/get_user_settings/<username>', methods=['GET'])
 def get_user_settings(username):
-    user = User.query.filter_by(username=username).first()
-    if user:
-        settings = PomodoroSettings.query.filter_by(UserID=user.userid).first()
-        if settings:
-            return jsonify({
-                "username": username,
-                "WorkInterval": settings.WorkInterval,
-                "ShortBreakInterval": settings.ShortBreakInterval,
-                "LongBreakInterval": settings.LongBreakInterval
-            })
-        else:
-            return jsonify({"message": "Settings not found"}), 404
+    user_settings = UserSettingsView.query.filter_by(username=username).first()
+    if user_settings:
+        return jsonify({
+            "username": username,
+            "WorkInterval": user_settings.WorkInterval,
+            "ShortBreakInterval": user_settings.ShortBreakInterval,
+            "LongBreakInterval": user_settings.LongBreakInterval
+        })
     else:
-        return jsonify({"message": "User not found"}), 404
+        return jsonify({"message": "User settings not found"}), 404
+

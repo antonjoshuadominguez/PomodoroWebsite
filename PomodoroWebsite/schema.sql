@@ -30,3 +30,16 @@ AFTER INSERT ON "users"
 BEGIN
     INSERT INTO "PomodoroSettings" ("UserID") VALUES (NEW."userid");
 END;
+
+-- Create the 'UserSettingsView' view
+CREATE VIEW "UserSettingsView" AS
+SELECT
+    u.username AS "username",
+    ps.WorkInterval AS "WorkInterval",
+    ps.ShortBreakInterval AS "ShortBreakInterval",
+    ps.LongBreakInterval AS "LongBreakInterval"
+FROM
+    "users" u
+JOIN
+    "PomodoroSettings" ps ON u.userid = ps.UserID;
+
