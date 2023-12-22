@@ -3,24 +3,31 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     background-color: #f0f0f0;
 }
 
-.login-container {
+.login-container, .db-operations-container {
     padding: 20px;
     background: #fff;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center; 
+    margin-bottom: 20px; /* Keeps space between containers */
 }
 
 #timer {
     font-size: 48px; 
-    margin: 20px 0; 
+    margin: 20px 0; /* Increase the bottom margin if necessary */
     color: #333;
+}
+
+/* Added container for pomodoro controls to manage spacing */
+#pomodoroControls {
+    margin-top: 20px; /* Space out from the timer */
 }
 
 form {
@@ -28,7 +35,7 @@ form {
     flex-direction: column;
 }
 
-input[type="text"], input[type="password"], input[type="email"] {
+input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ddd;
@@ -42,6 +49,7 @@ button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    margin: 5px 0; /* Adds space between buttons */
 }
 
 button:hover {

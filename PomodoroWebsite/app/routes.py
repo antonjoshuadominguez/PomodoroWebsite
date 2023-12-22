@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
 from sqlalchemy.exc import IntegrityError
 from .models import db, User, PomodoroSettings, UserSettingsView
 
@@ -46,9 +46,49 @@ def login_user():
     user = User.query.filter_by(username=username).first()
 
     if user and user.password == password:
+        session['userid'] = user.userid
         return redirect(url_for('routes.index'))
     else:
-        return jsonify({"message": "Invalid username or password"}), 401
+        flash("Invalid username or password")
+        return redirect(url_for('routes.login'))
+
+    
+@routes.route('/start_pomodoro', methods=['POST'])
+def start_pomodoro():
+    # Check if user is logged in
+    if 'userid' not in session:
+        flash("Please log in to continue.")
+        return redirect(url_for('routes.login'))
+
+    userid = session['userid']
+    work_interval = request.form.get('workInterval')
+    short_break_interval = request.form.get('shortBreakInterval')
+    long_break_interval = request.form.get('longBreakInterval')
+
+    # Create or update PomodoroSettings for the user
+    settings = PomodoroSettings.query.filter_by(UserID=userid).first()
+    if settings:
+        settings.WorkInterval = work_interval
+        settings.ShortBreakInterval = short_break_interval
+        settings.LongBreakInterval = long_break_interval
+    else:
+        new_settings = PomodoroSettings(
+            UserID=userid,
+            WorkInterval=work_interval,
+            ShortBreakInterval=short_break_interval,
+            LongBreakInterval=long_break_interval
+        )
+        db.session.add(new_settings)
+
+    try:
+        db.session.commit()
+        flash('Pomodoro settings updated successfully.')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to update settings: ' + str(e))
+
+    return redirect(url_for('routes.index'))
+
 
 @routes.route('/get_user_settings/<username>', methods=['GET'])
 def get_user_settings(username):
@@ -62,4 +102,23 @@ def get_user_settings(username):
         })
     else:
         return jsonify({"message": "User settings not found"}), 404
+    
+@routes.route('/get_user_logs/<username>', methods=['GET'])
+def get_user_logs(username):
+    query = """
+    SELECT u.username, pl.LogID, pl.Note
+    FROM users u
+    JOIN PomodoroLogs pl ON u.userid = pl.UserID
+    WHERE u.username = :username
+    """
+    
+    result = db.session.execute(query, {"username": username})
+    
+    logs = result.fetchall()
+    
+    if logs:
+        logs_list = [{"username": log.username, "LogID": log.LogID, "Note": log.Note} for log in logs]
+        return jsonify(logs_list)
+    else:
+        return jsonify({"message": "No logs found for the user"}), 404
 

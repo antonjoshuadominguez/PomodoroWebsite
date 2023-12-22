@@ -12,32 +12,46 @@
         <a href="/login"><button>Login</button></a>
         <a href="/register"><button>Register</button></a>
 
+        <!-- Settings Form -->
+        <form id="settingsForm" action="/start_pomodoro" method="post">
+            <h2>Set Your Intervals</h2>
+            <label>Work Interval (minutes): <input type="number" name="workInterval" id="workInput" value="25"></label><br>
+            <label>Short Break (minutes): <input type="number" name="shortBreakInterval" id="shortBreakInput" value="5"></label><br>
+            <label>Long Break (minutes): <input type="number" name="longBreakInterval" id="longBreakInput" value="15"></label><br>
+            <input type="submit" value="Start Using Pomodoro">
+        </form>
+        
         <!-- Pomodoro Timer Display -->
         <div id="timer">25:00</div>
 
-        <!-- Pomodoro Controls -->
-        <button id="pomodoroButton" onclick="togglePomodoro()">Start Pomodoro</button>
-        <button id="modeButton" onclick="changeMode()">Short Break</button>
-        <button onclick="resetTimer()">Reset Timer</button>
-        <button onclick="openSettings()">Settings</button>
-
-        <!-- Settings Form (Hidden initially) -->
-        <div id="settingsForm" style="display:none;">
-            <label>Work Interval (minutes): <input type="number" id="workInput" value="25"></label><br>
-            <label>Short Break (minutes): <input type="number" id="shortBreakInput" value="5"></label><br>
-            <label>Long Break (minutes): <input type="number" id="longBreakInput" value="15"></label><br>
-            <button onclick="applySettings()">Apply Settings</button>
+        <!-- Pomodoro Controls, now hidden initially -->
+        <div id="pomodoroControls" style="display:none;">
+            <button id="pomodoroButton" type="button" onclick="togglePomodoro()">Start Pomodoro</button>
+            <button id="modeButton" type="button" onclick="changeMode()">Short Break</button>
+            <button type="button" onclick="resetTimer()">Reset Timer</button>
         </div>
     </div>
+
+    <div class="db-operations-container">
+        <a href="/user_settings"><button>View User Settings</button></a>
+        <a href="/sql_join"><button>SQL Join Operation</button></a>
+        <a href="/stored_procedure"><button>Stored Procedure Execution</button></a>
+        <a href="/trigger_operation"><button>Trigger Operation</button></a>
     </div>
+
     <script>
-        var workTime = 25 * 60; // 25 minutes
-        var shortBreak = 5 * 60; // 5 minutes
-        var longBreak = 60 * 60; // 1 hour
-        var currentTimer = workTime;
+        var workTime = null;
+        var shortBreak = null;
+        var longBreak = null;
+        var currentTimer = 0; // Initially set to 0
         var isTimerRunning = false;
         var interval;
         var mode = 'work'; 
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('settingsForm').style.display = 'block';
+            document.getElementById('pomodoroControls').style.display = 'none';
+        });
 
         function updateTimerDisplay() {
             var minutes = parseInt(currentTimer / 60, 10);
@@ -50,37 +64,46 @@
         }
 
         function startTimer() {
-            interval = setInterval(function () {
+            interval = setInterval(function() {
                 if (--currentTimer < 0) {
                     clearInterval(interval);
                     isTimerRunning = false;
                     document.getElementById('pomodoroButton').textContent = 'Start Pomodoro';
+                    // Handle completion of the timer here
                 }
                 updateTimerDisplay();
             }, 1000);
             isTimerRunning = true;
+            document.getElementById('pomodoroButton').textContent = 'Pause Pomodoro';
         }
 
         function resetTimer() {
-            currentTimer = workTime; // Reset the timer to the work interval
+            currentTimer = workTime;
             updateTimerDisplay();
-            clearInterval(interval); // Clear any running intervals
+            clearInterval(interval);
             isTimerRunning = false;
             document.getElementById('pomodoroButton').textContent = 'Start Pomodoro';
         }
 
         function togglePomodoro() {
-            if (isTimerRunning) {
+            if (!isTimerRunning) {
+                applySettings();
+            } else {
                 clearInterval(interval);
                 isTimerRunning = false;
                 document.getElementById('pomodoroButton').textContent = 'Resume Pomodoro';
-            } else {
-                startTimer();
-                document.getElementById('pomodoroButton').textContent = 'Pause Pomodoro';
             }
         }
 
         function changeMode() {
+            if (!workTime || !shortBreak || !longBreak) {
+                alert("Please set the intervals first.");
+                return;
+            }
+
+            clearInterval(interval);
+            isTimerRunning = false;
+
             switch (mode) {
                 case 'work':
                     currentTimer = shortBreak;
@@ -99,16 +122,6 @@
                     break;
             }
             updateTimerDisplay();
-            if (isTimerRunning) {
-                clearInterval(interval);
-                startTimer();
-            }
-        }
-
-        updateTimerDisplay();
-
-        function openSettings() {
-            document.getElementById('settingsForm').style.display = 'block';
         }
 
         function applySettings() {
@@ -116,18 +129,18 @@
             shortBreak = parseInt(document.getElementById('shortBreakInput').value) * 60;
             longBreak = parseInt(document.getElementById('longBreakInput').value) * 60;
 
-            // Reset timer and update display
-            if (mode === 'work') {
-                currentTimer = workTime;
-            } else if (mode === 'shortBreak') {
-                currentTimer = shortBreak;
-            } else {
-                currentTimer = longBreak;
+            if (isNaN(workTime) || isNaN(shortBreak) || isNaN(longBreak) || workTime <= 0 || shortBreak <= 0 || longBreak <= 0) {
+                alert('Please enter valid numbers greater than zero for all intervals.');
+                return;
             }
+
+            currentTimer = workTime;
             updateTimerDisplay();
 
-            // Hide settings form
             document.getElementById('settingsForm').style.display = 'none';
+            document.getElementById('pomodoroControls').style.display = 'block';
+
+            startTimer();
         }
     </script>
 </body>

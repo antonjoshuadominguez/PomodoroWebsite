@@ -30,3 +30,4 @@ class UserSettingsView(db.Model):
     ShortBreakInterval = db.Column(db.Integer)
     LongBreakInterval = db.Column(db.Integer)
 
+
