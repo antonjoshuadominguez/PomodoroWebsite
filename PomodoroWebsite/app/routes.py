@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
 from sqlalchemy.exc import IntegrityError
 from .models import db, User, PomodoroSettings, UserSettingsView, PomodoroLogs
+from sqlalchemy import text
 
 routes = Blueprint('routes', __name__)
 
@@ -186,4 +187,21 @@ def get_user_logs(username):
         return jsonify(logs_list)
     else:
         return jsonify({"message": "No logs found for the user"}), 404
+    
+@routes.route('/display_user_settings')
+def display_user_settings():
+    user_settings = []
+
+    view_data = db.session.execute(text("SELECT username, WorkInterval, ShortBreakInterval, LongBreakInterval FROM UserSettingsView;"))
+    
+    for row in view_data.fetchall():
+        user_settings.append({
+            'username': row[0],
+            'WorkInterval': row[1],
+            'ShortBreakInterval': row[2],
+            'LongBreakInterval': row[3]
+        })
+
+    return render_template('user_settings.html', user_settings=user_settings)
+
 
