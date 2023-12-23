@@ -33,6 +33,37 @@
         </div>
     </div>
 
+            <!-- Notes Button -->
+    <div class="notes-button">
+        <button onclick="toggleNotes()">Notes</button>
+    </div>
+
+    <!-- Container for Form and Table -->
+    <div class="notes-container">
+        <!-- Form to Add New Note -->
+        <form action="{{ url_for('routes.add_note') }}" method="post">
+            <textarea id="notesTextArea" name="note" rows="5" cols="33" placeholder="Write your notes here..."></textarea>
+            <button type="submit">Save Note</button>
+        </form>
+    </div>
+
+    <!-- Table to Display and Manage Existing Notes -->
+    <div class="notes-table">
+        <table>
+            <tr>
+                <th>Note</th>
+                <th>Actions</th>
+            </tr>
+            {% for note in user_notes %}
+            <tr>
+                <td>{{ note.Note }}</td>
+                <td>
+                    <a href="{{ url_for('routes.delete_note', LogID=note.LogID) }}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 
     <div class="auth-container">
         {% if 'userid' not in session %}
@@ -114,6 +145,15 @@
         }
     }
 
+    function toggleNotes() {
+        var notesForm = document.getElementById('notesForm');
+        if (notesForm.style.display === 'none' || notesForm.style.display === '') {
+            notesForm.style.display = 'block';
+        } else {
+            notesForm.style.display = 'none';
+        }
+    }
+
     function togglePomodoro() {
         if (isTimerRunning) {
             clearInterval(interval);
@@ -145,7 +185,6 @@
                 break;
         }
         updateTimerDisplay();
-        // Remove startTimer() if you don't want to start the timer automatically
     }
         
     
@@ -159,15 +198,12 @@
                 return;
             }
     
-            // Update the current timer and display
             currentTimer = workTime;
             updateTimerDisplay();
     
-            // Hide the settings form and show the timer controls
             document.getElementById('settingsForm').style.display = 'none';
             document.getElementById('pomodoroControls').style.display = 'block';
     
-            // Optionally, start the timer immediately
             startTimer();
         }
         updateTimerDisplay();

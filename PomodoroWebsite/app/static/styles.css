@@ -63,3 +63,60 @@ button:hover, input[type="submit"]:hover {
 .pomodoro-settings h2 {
     margin-bottom: 10px;
 }
+
+.notes-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 5px 0;
+}
+
+#notesForm {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#notesTextArea {
+    width: 60%; /* Adjust as needed */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px; /* Add some spacing between the textarea and the table */
+}
+
+/* Style the table */
+table {
+    border-collapse: collapse;
+    width: 40%; /* Adjust as needed */
+    border: 1px solid #ddd;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+/* Style table headers */
+table th {
+    background-color: #f2f2f2;
+}
+
+/* Style table rows */
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Style table row links */
+table a {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 10px; /* Add some spacing between the links */
+}
+
+/* Style table row links on hover */
+table a:hover {
+    text-decoration: underline;
+}

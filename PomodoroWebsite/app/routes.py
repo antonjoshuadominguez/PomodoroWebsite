@@ -1,12 +1,23 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
 from sqlalchemy.exc import IntegrityError
-from .models import db, User, PomodoroSettings, UserSettingsView
+from .models import db, User, PomodoroSettings, UserSettingsView, PomodoroLogs
 
 routes = Blueprint('routes', __name__)
 
 @routes.route('/')
-def home():
-    return render_template('index.html')
+def index():
+    settings_applied = session.get('settings_applied', False)
+    saved_note = ''
+    user_notes = []
+
+    if 'userid' in session:
+        userid = session['userid']
+        # Fetch the most recent note of the logged-in user
+        user_notes = PomodoroLogs.query.filter_by(UserID=userid).order_by(PomodoroLogs.LogID.desc()).all()
+
+    return render_template('index.html', settings_applied=settings_applied, user_notes=user_notes)
+
+
 
 @routes.route('/login')
 def login():
@@ -15,12 +26,6 @@ def login():
 @routes.route('/register')
 def register():
     return render_template('register.html')
-
-@routes.route('/index')
-def index():
-    settings_applied = session.get('settings_applied', False)
-    return render_template('index.html', settings_applied=settings_applied)
-
 
 @routes.route('/create_user', methods=['POST'])
 def create_user():
@@ -98,7 +103,46 @@ def start_pomodoro():
 
     return redirect(url_for('routes.index'))
 
+@routes.route('/add_note', methods=['POST'])
+def add_note():
+    if 'userid' not in session:
+        flash("Please log in to add notes.")
+        return redirect(url_for('routes.login'))
 
+    note = request.form.get('note')
+    userid = session['userid']
+
+    new_note = PomodoroLogs(UserID=userid, Note=note)
+    db.session.add(new_note)
+
+    try:
+        db.session.commit()
+        flash('Note added successfully.')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to add note: ' + str(e))
+
+    return redirect(url_for('routes.index'))
+
+@routes.route('/delete_note/<int:LogID>')
+def delete_note(LogID):
+    if 'userid' not in session:
+        flash("Please log in to delete notes.")
+        return redirect(url_for('routes.login'))
+
+    note_to_delete = PomodoroLogs.query.get(LogID)
+    if note_to_delete and note_to_delete.UserID == session['userid']:
+        db.session.delete(note_to_delete)
+        try:
+            db.session.commit()
+            flash('Note deleted successfully.')
+        except Exception as e:
+            db.session.rollback()
+            flash('Failed to delete note: ' + str(e))
+    else:
+        flash('Note not found or access denied.')
+
+    return redirect(url_for('routes.index'))
 
 @routes.route('/get_user_settings/<username>', methods=['GET'])
 def get_user_settings(username):

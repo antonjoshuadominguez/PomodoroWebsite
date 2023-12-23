@@ -17,9 +17,9 @@
         {% for settings in user_settings %}
         <tr>
             <td>{{ settings.username }}</td>
-            <td>{{ settings.WorkInterval }}</td>
-            <td>{{ settings.ShortBreakInterval }}</td>
-            <td>{{ settings.LongBreakInterval }}</td>
+            <td>{{ settings.WorkInterval }} minutes</td>
+            <td>{{ settings.ShortBreakInterval }} minutes</td>
+            <td>{{ settings.LongBreakInterval }} minutes</td>
         </tr>
         {% endfor %}
     </table>
