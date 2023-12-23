@@ -18,7 +18,9 @@ def register():
 
 @routes.route('/index')
 def index():
-    return render_template('index.html')
+    settings_applied = session.get('settings_applied', False)
+    return render_template('index.html', settings_applied=settings_applied)
+
 
 @routes.route('/create_user', methods=['POST'])
 def create_user():
@@ -47,10 +49,16 @@ def login_user():
 
     if user and user.password == password:
         session['userid'] = user.userid
+        session['settings_applied'] = False
         return redirect(url_for('routes.index'))
     else:
         flash("Invalid username or password")
         return redirect(url_for('routes.login'))
+    
+@routes.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('routes.login'))
 
     
 @routes.route('/start_pomodoro', methods=['POST'])
@@ -65,7 +73,6 @@ def start_pomodoro():
     short_break_interval = request.form.get('shortBreakInterval')
     long_break_interval = request.form.get('longBreakInterval')
 
-    # Create or update PomodoroSettings for the user
     settings = PomodoroSettings.query.filter_by(UserID=userid).first()
     if settings:
         settings.WorkInterval = work_interval
@@ -83,11 +90,14 @@ def start_pomodoro():
     try:
         db.session.commit()
         flash('Pomodoro settings updated successfully.')
+        session['settings_applied'] = True
+
     except Exception as e:
         db.session.rollback()
         flash('Failed to update settings: ' + str(e))
 
     return redirect(url_for('routes.index'))
+
 
 
 @routes.route('/get_user_settings/<username>', methods=['GET'])

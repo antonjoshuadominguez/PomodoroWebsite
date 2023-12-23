@@ -9,27 +9,41 @@
 <body>
     <div class="login-container">
         <h1>Welcome to the Pomodoro Tracker</h1>
-        <a href="/login"><button>Login</button></a>
-        <a href="/register"><button>Register</button></a>
-
-        <!-- Settings Form -->
-        <form id="settingsForm" action="/start_pomodoro" method="post">
-            <h2>Set Your Intervals</h2>
-            <label>Work Interval (minutes): <input type="number" name="workInterval" id="workInput" value="25"></label><br>
-            <label>Short Break (minutes): <input type="number" name="shortBreakInterval" id="shortBreakInput" value="5"></label><br>
-            <label>Long Break (minutes): <input type="number" name="longBreakInterval" id="longBreakInput" value="15"></label><br>
-            <input type="submit" value="Start Using Pomodoro">
-        </form>
-        
-        <!-- Pomodoro Timer Display -->
+        <!-- Always show Pomodoro Timer Display and Controls -->
         <div id="timer">25:00</div>
-
-        <!-- Pomodoro Controls, now hidden initially -->
-        <div id="pomodoroControls" style="display:none;">
+        <div id="pomodoroControls">
             <button id="pomodoroButton" type="button" onclick="togglePomodoro()">Start Pomodoro</button>
             <button id="modeButton" type="button" onclick="changeMode()">Short Break</button>
             <button type="button" onclick="resetTimer()">Reset Timer</button>
+            <!-- Settings button is only shown if user is logged in -->
+            {% if 'userid' in session %}
+                <button id="toggleSettingsButton" onclick="toggleSettingsForm()">Settings</button>
+            {% endif %}
         </div>
+
+        <!-- Settings Form, hidden initially and only accessible if logged in -->
+        <div id="settingsForm" style="display: none;">
+            <form id="settingsForm" action="/start_pomodoro" method="post">
+                <h2>Set Your Intervals</h2>
+                <label>Work Interval (minutes): <input type="number" name="workInterval" id="workInput" value="25"></label><br>
+                <label>Short Break (minutes): <input type="number" name="shortBreakInterval" id="shortBreakInput" value="5"></label><br>
+                <label>Long Break (minutes): <input type="number" name="longBreakInterval" id="longBreakInput" value="15"></label><br>
+                <input type="submit" value="Start Using Pomodoro">
+            </form>
+        </div>
+    </div>
+
+
+    <div class="auth-container">
+        {% if 'userid' not in session %}
+            <p>If you wish to change the intervals, please log in or register.</p>
+            <div class="auth-buttons">
+                <a href="{{ url_for('routes.login') }}"><button>Login</button></a>
+                <a href="{{ url_for('routes.register') }}"><button>Register</button></a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('routes.logout') }}"><button>Logout</button></a>
+        {% endif %}
     </div>
 
     <div class="db-operations-container">
@@ -40,108 +54,124 @@
     </div>
 
     <script>
-        var workTime = null;
-        var shortBreak = null;
-        var longBreak = null;
-        var currentTimer = 0; // Initially set to 0
-        var isTimerRunning = false;
-        var interval;
-        var mode = 'work'; 
+        var workTime = 25 * 60;  
+    var shortBreak = 5 * 60; 
+    var longBreak = 15 * 60;  
+    var currentTimer = workTime;  
+    var isTimerRunning = false;
+    var interval;
+    var mode = 'work'; 
 
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('settingsForm').style.display = 'block';
-            document.getElementById('pomodoroControls').style.display = 'none';
-        });
+    function updateTimerDisplay() {
+        var minutes = Math.floor(currentTimer / 60);
+        var seconds = currentTimer % 60;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        document.getElementById('timer').textContent = minutes + ':' + seconds;
+    }
 
-        function updateTimerDisplay() {
-            var minutes = parseInt(currentTimer / 60, 10);
-            var seconds = parseInt(currentTimer % 60, 10);
-
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
-
-            document.querySelector('#timer').textContent = minutes + ":" + seconds;
-        }
-
-        function startTimer() {
+    function startTimer() {
+        if (!isTimerRunning) {
+            isTimerRunning = true;
+            document.getElementById('pomodoroButton').textContent = 'Pause Pomodoro';
             interval = setInterval(function() {
-                if (--currentTimer < 0) {
+                currentTimer--;
+                updateTimerDisplay();
+                if (currentTimer <= 0) {
                     clearInterval(interval);
                     isTimerRunning = false;
                     document.getElementById('pomodoroButton').textContent = 'Start Pomodoro';
-                    // Handle completion of the timer here
+                    // Change mode automatically if timer reaches zero
+                    changeMode();
                 }
-                updateTimerDisplay();
             }, 1000);
-            isTimerRunning = true;
-            document.getElementById('pomodoroButton').textContent = 'Pause Pomodoro';
         }
+    }
 
-        function resetTimer() {
+    function resetTimer() {
+        clearInterval(interval);
+        isTimerRunning = false;
+        document.getElementById('pomodoroButton').textContent = 'Start Pomodoro';
+        if (mode === 'work') {
             currentTimer = workTime;
-            updateTimerDisplay();
+        } else if (mode === 'shortBreak') {
+            currentTimer = shortBreak;
+        } else {  // longBreak
+            currentTimer = longBreak;
+        }
+        updateTimerDisplay();
+    }
+
+    function toggleSettingsForm() {
+        var settingsForm = document.getElementById('settingsForm');
+        var pomodoroControls = document.getElementById('pomodoroControls');
+        if (settingsForm.style.display === 'none' || settingsForm.style.display === '') {
+            settingsForm.style.display = 'block';
+            pomodoroControls.style.display = 'none';
+        } else {
+            settingsForm.style.display = 'none';
+            pomodoroControls.style.display = 'block';
+        }
+    }
+
+    function togglePomodoro() {
+        if (isTimerRunning) {
             clearInterval(interval);
             isTimerRunning = false;
-            document.getElementById('pomodoroButton').textContent = 'Start Pomodoro';
+            document.getElementById('pomodoroButton').textContent = 'Resume Pomodoro';
+        } else {
+            startTimer();
         }
+    }
 
-        function togglePomodoro() {
-            if (!isTimerRunning) {
-                applySettings();
-            } else {
-                clearInterval(interval);
-                isTimerRunning = false;
-                document.getElementById('pomodoroButton').textContent = 'Resume Pomodoro';
-            }
+    function changeMode() {
+        clearInterval(interval);
+        isTimerRunning = false;
+        switch (mode) {
+            case 'work':
+                currentTimer = shortBreak;
+                mode = 'shortBreak';
+                document.getElementById('modeButton').textContent = 'Long Break';
+                break;
+            case 'shortBreak':
+                currentTimer = longBreak;
+                mode = 'longBreak';
+                document.getElementById('modeButton').textContent = 'Work Time';
+                break;
+            case 'longBreak':
+                currentTimer = workTime;
+                mode = 'work';
+                document.getElementById('modeButton').textContent = 'Short Break';
+                break;
         }
-
-        function changeMode() {
-            if (!workTime || !shortBreak || !longBreak) {
-                alert("Please set the intervals first.");
-                return;
-            }
-
-            clearInterval(interval);
-            isTimerRunning = false;
-
-            switch (mode) {
-                case 'work':
-                    currentTimer = shortBreak;
-                    mode = 'shortBreak';
-                    document.getElementById('modeButton').textContent = 'Long Break';
-                    break;
-                case 'shortBreak':
-                    currentTimer = longBreak;
-                    mode = 'longBreak';
-                    document.getElementById('modeButton').textContent = 'Work Time';
-                    break;
-                case 'longBreak':
-                    currentTimer = workTime;
-                    mode = 'work';
-                    document.getElementById('modeButton').textContent = 'Short Break';
-                    break;
-            }
-            updateTimerDisplay();
-        }
-
+        updateTimerDisplay();
+        // Remove startTimer() if you don't want to start the timer automatically
+    }
+        
+    
         function applySettings() {
             workTime = parseInt(document.getElementById('workInput').value) * 60;
             shortBreak = parseInt(document.getElementById('shortBreakInput').value) * 60;
             longBreak = parseInt(document.getElementById('longBreakInput').value) * 60;
-
+    
             if (isNaN(workTime) || isNaN(shortBreak) || isNaN(longBreak) || workTime <= 0 || shortBreak <= 0 || longBreak <= 0) {
                 alert('Please enter valid numbers greater than zero for all intervals.');
                 return;
             }
-
+    
+            // Update the current timer and display
             currentTimer = workTime;
             updateTimerDisplay();
-
+    
+            // Hide the settings form and show the timer controls
             document.getElementById('settingsForm').style.display = 'none';
             document.getElementById('pomodoroControls').style.display = 'block';
-
+    
+            // Optionally, start the timer immediately
             startTimer();
         }
+        updateTimerDisplay();
     </script>
+    
 </body>
 </html>

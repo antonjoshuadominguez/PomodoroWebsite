@@ -10,24 +10,23 @@ body {
     background-color: #f0f0f0;
 }
 
-.login-container, .db-operations-container {
+.login-container, .db-operations-container, .auth-buttons {
     padding: 20px;
     background: #fff;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center; 
-    margin-bottom: 20px; /* Keeps space between containers */
+    text-align: center;
+    margin-bottom: 20px; 
 }
 
 #timer {
-    font-size: 48px; 
-    margin: 20px 0; /* Increase the bottom margin if necessary */
+    font-size: 48px;
+    margin: 20px 0; 
     color: #333;
 }
 
-/* Added container for pomodoro controls to manage spacing */
 #pomodoroControls {
-    margin-top: 20px; /* Space out from the timer */
+    margin-top: 20px; 
 }
 
 form {
@@ -42,17 +41,17 @@ input[type="text"], input[type="password"], input[type="email"], input[type="num
     border-radius: 4px;
 }
 
-button {
+button, input[type="submit"] {
     padding: 10px;
     background-color: blue;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin: 5px 0; /* Adds space between buttons */
+    margin: 5px 0;
 }
 
-button:hover {
+button:hover, input[type="submit"]:hover {
     background-color: darkblue;
 }
 
