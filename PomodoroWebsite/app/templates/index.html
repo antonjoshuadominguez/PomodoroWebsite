@@ -33,7 +33,7 @@
         </div>
     </div>
 
-            <!-- Notes Button -->
+    <!-- Notes Button -->
     <div class="notes-button">
         <button onclick="toggleNotes()">Notes</button>
     </div>
@@ -46,26 +46,28 @@
                 <button type="submit">Save Note</button>
             </form>
         </div>
-
-        <!-- Table to Display and Manage Existing Notes -->
         
-        <div class="notes-table">
-            <table>
-                <tr>
-                    <th>Note</th>
-                    <th>Actions</th>
-                </tr>
-                {% for note in user_notes %}
-                <tr>
-                    <td>{{ note.Note }}</td>
-                    <td>
-                        <a href="{{ url_for('routes.delete_note', LogID=note.LogID) }}">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
+    <div class="notes-table">
+        <table>
+            <tr>
+                <th>Note</th>
+                <th>Actions</th>
+            </tr>
+            {% for note in user_notes %}
+            <tr id="note-row-{{ note.LogID }}">
+                <td>
+                    <div id="note-display-{{ note.LogID }}">{{ note.Note }}</div>
+                    <textarea id="note-edit-{{ note.LogID }}" style="display:none;">{{ note.Note }}</textarea>
+                </td>
+                <td>
+                    <a href="#" class="btn-link" onclick="editNoteToggle({{ note.LogID }})">Edit</a>
+                    <a href="{{ url_for('routes.delete_note', LogID=note.LogID) }}" class="btn-link">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
+</div>
 
     <div class="auth-container">
         {% if 'userid' not in session %}
@@ -155,8 +157,40 @@
             notesContainer.style.display = 'none';
         }
     }
-    
 
+    function editNoteToggle(logId) {
+        var displayDiv = document.getElementById('note-display-' + logId);
+        var editTextArea = document.getElementById('note-edit-' + logId);
+        var isEditing = editTextArea.style.display === 'block';
+
+        if (isEditing) {
+            // Switch to display mode and update note
+            updateNote(logId, editTextArea.value);
+        } else {
+            // Switch to edit mode
+            displayDiv.style.display = 'none';
+            editTextArea.style.display = 'block';
+        }
+    }
+
+    function updateNote(logId, noteContent) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/update_note/" + logId, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                var displayDiv = document.getElementById('note-display-' + logId);
+                var editTextArea = document.getElementById('note-edit-' + logId);
+
+                // Update the display div with new content and hide the textarea
+                displayDiv.textContent = noteContent;
+                displayDiv.style.display = 'block';
+                editTextArea.style.display = 'none';
+            }
+        }
+        xhr.send('note=' + encodeURIComponent(noteContent));
+    }
+    
     function togglePomodoro() {
         if (isTimerRunning) {
             clearInterval(interval);

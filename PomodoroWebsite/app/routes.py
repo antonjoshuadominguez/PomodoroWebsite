@@ -125,6 +125,25 @@ def add_note():
 
     return redirect(url_for('routes.index'))
 
+@routes.route('/update_note/<int:LogID>', methods=['POST'])
+def update_note(LogID):
+    if 'userid' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    note_content = request.form.get('note')
+    note_to_update = PomodoroLogs.query.get(LogID)
+
+    if note_to_update and note_to_update.UserID == session['userid']:
+        note_to_update.Note = note_content
+        try:
+            db.session.commit()
+            return jsonify({'message': 'Note updated successfully'})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'Note not found or access denied'}), 404
+
 @routes.route('/delete_note/<int:LogID>')
 def delete_note(LogID):
     if 'userid' not in session:
@@ -203,5 +222,3 @@ def display_user_settings():
         })
 
     return render_template('user_settings.html', user_settings=user_settings)
-
-
