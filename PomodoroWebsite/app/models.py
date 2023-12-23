@@ -31,3 +31,9 @@ class UserSettingsView(Base):
     WorkInterval = db.Column(db.Integer)
     ShortBreakInterval = db.Column(db.Integer)
     LongBreakInterval = db.Column(db.Integer)
+
+class ProcedureView(Base):
+    __tablename__ = 'ProcedureView'
+    username = db.Column(db.Text, primary_key=True)
+    TotalSessions = db.Column(db.Integer)
+    AverageWorkInterval = db.Column(db.Integer)

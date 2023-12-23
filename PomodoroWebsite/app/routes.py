@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
 from sqlalchemy.exc import IntegrityError
-from .models import db, User, PomodoroSettings, UserSettingsView, PomodoroLogs
+from .models import db, User, PomodoroSettings, UserSettingsView, PomodoroLogs, ProcedureView
 from sqlalchemy import text
 
 routes = Blueprint('routes', __name__)
@@ -222,3 +222,18 @@ def display_user_settings():
         })
 
     return render_template('user_settings.html', user_settings=user_settings)
+
+@routes.route('/stored_procedure')
+def store_procedures():
+    stored_procedure = []
+
+    view_data_procedure = db.session.execute(text("SELECT username, TotalSessions, AverageWorkInterval FROM ProcedureView;"))
+    
+    for row in view_data_procedure.fetchall():
+        stored_procedure.append({
+            'username': row[0],
+            'TotalSessions': row[1],
+            'AverageWorkInterval': row[2],
+        })
+
+    return render_template('stored_procedure.html', stored_procedure=stored_procedure)
