@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Stored Procedure</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Stored Procedure</h1>
+    <table>
+        <tr>
+            <th>Username</th>
+            <th>TotalSessions</th>
+            <th>AverageWorkInterval</th>
+        </tr>
+        {% for procedure in stored_procedure %}
+        <tr>
+            <td>{{ procedure.username }}</td>
+            <td>{{ procedure.TotalSessions }} minutes</td>
+            <td>{{ procedure.AverageWorkInterval }} minutes</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/">Back to Home</a>
+</body>
+</html>
