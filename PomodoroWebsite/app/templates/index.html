@@ -197,6 +197,21 @@
         } else {
             startTimer();
         }
+        var workInterval = parseInt(document.getElementById('workInput').value);
+        var shortBreakInterval = parseInt(document.getElementById('shortBreakInput').value);
+        var longBreakInterval = parseInt(document.getElementById('longBreakInput').value);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/start_pomodoro", true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                console.log("Pomodoro data sent: ", this.responseText);
+                // Additional actions upon successful request
+            }
+        };
+
+        xhr.send('workInterval=' + workInterval + '&shortBreakInterval=' + shortBreakInterval + '&longBreakInterval=' + longBreakInterval);
     }
 
     function changeMode() {
