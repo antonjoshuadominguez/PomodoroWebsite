@@ -7,6 +7,9 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pomodoro.db'
     
     db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
     
     app.register_blueprint(routes_bp, url_prefix='/')
 

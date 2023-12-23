@@ -30,7 +30,7 @@ def register():
 @routes.route('/create_user', methods=['POST'])
 def create_user():
     username = request.form['username']
-    password = request.form['password']  # Directly using the password without hashing
+    password = request.form['password']
     email = request.form['email']
 
     new_user = User(username=username, password=password, email=email)
@@ -156,6 +156,17 @@ def get_user_settings(username):
         })
     else:
         return jsonify({"message": "User settings not found"}), 404
+    
+@routes.route('/user_settings')
+def user_settings():
+    if 'userid' not in session:
+        flash("Please log in to view user settings.")
+        return redirect(url_for('routes.login'))
+
+    userid = session['userid']
+    settings = UserSettingsView.query.filter_by(userid=userid).all()
+    return render_template('user_settings.html', user_settings=settings)
+
     
 @routes.route('/get_user_logs/<username>', methods=['GET'])
 def get_user_logs(username):

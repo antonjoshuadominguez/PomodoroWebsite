@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declarative_base
 
 db = SQLAlchemy()
+Base = declarative_base()
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -23,7 +25,7 @@ class PomodoroLogs(db.Model):
     UserID = db.Column(db.Integer, db.ForeignKey('users.userid'))
     Note = db.Column(db.Text)
 
-class UserSettingsView(db.Model):
+class UserSettingsView(Base):
     __tablename__ = 'UserSettingsView'
     username = db.Column(db.Text, primary_key=True)
     WorkInterval = db.Column(db.Integer)
