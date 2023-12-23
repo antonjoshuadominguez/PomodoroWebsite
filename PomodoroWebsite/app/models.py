@@ -29,5 +29,3 @@ class UserSettingsView(db.Model):
     WorkInterval = db.Column(db.Integer)
     ShortBreakInterval = db.Column(db.Integer)
     LongBreakInterval = db.Column(db.Integer)
-
-
